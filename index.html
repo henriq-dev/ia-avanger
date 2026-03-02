@@ -3,138 +3,337 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Linha do Tempo da IA</title>
+<title>História da Inteligência Artificial</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050810;--bg2:#0a0f1e;--bg3:#0f1629;--surface:#111827;
+  --border:rgba(99,179,237,0.15);--blue:#63b3ed;--cyan:#76e4f7;--purple:#b794f4;
+  --green:#68d391;--red:#fc8181;--text:#e2e8f0;--muted:#718096;--glow:rgba(99,179,237,0.4);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px}
 
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(99,179,237,.12) 0%,transparent 70%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(183,148,244,.08) 0%,transparent 60%)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,179,237,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,.04) 1px,transparent 1px);background-size:60px 60px}
+.hero-content{position:relative;z-index:1;max-width:800px}
+.hero-tag{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem 1rem;border-radius:999px;border:1px solid var(--border);background:rgba(99,179,237,.08);font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--blue);letter-spacing:.05em;margin-bottom:1.5rem;animation:fadeDown .8s ease both}
+.hero-tag::before{content:'◉';font-size:.6rem;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(2.2rem,6vw,4.5rem);font-weight:700;line-height:1.1;background:linear-gradient(135deg,#fff 0%,var(--blue) 40%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:fadeUp .8s .2s ease both}
+.hero-sub{margin-top:1.5rem;font-size:1.05rem;color:var(--muted);max-width:600px;margin-inline:auto;animation:fadeUp .8s .4s ease both}
+.hero-stats{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap;margin-top:3rem;animation:fadeUp .8s .6s ease both}
+.stat{text-align:center}
+.stat-num{font-size:2rem;font-weight:700;color:var(--blue);font-family:'JetBrains Mono',monospace}
+.stat-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.scroll-hint{position:absolute;bottom:2rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;color:var(--muted);font-size:.8rem;animation:fadeUp 1s 1s ease both}
+.scroll-hint::after{content:'';width:1px;height:40px;background:linear-gradient(var(--blue),transparent);animation:scrollLine 1.5s ease infinite}
+@keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1)}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* SECTIONS */
+section{padding:5rem 1.5rem;max-width:1100px;margin:0 auto}
+.section-header{text-align:center;margin-bottom:4rem}
+.section-tag{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--cyan);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.75rem}
+h2{font-size:clamp(1.8rem,4vw,3rem);font-weight:700;background:linear-gradient(135deg,#fff,var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-desc{color:var(--muted);margin-top:.75rem;max-width:550px;margin-inline:auto}
+
+/* FILTERS */
+.filters{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-bottom:3rem}
+.filter-btn{padding:.5rem 1.25rem;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:.875rem;cursor:pointer;transition:all .25s}
+.filter-btn:hover,.filter-btn.active{background:rgba(99,179,237,.15);border-color:var(--blue);color:var(--blue);box-shadow:0 0 20px rgba(99,179,237,.2)}
+
+/* TIMELINE */
+.timeline{position:relative;padding:1rem 0}
+.timeline::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,transparent,var(--blue),var(--purple),transparent);transform:translateX(-50%)}
+.tl-item{display:flex;align-items:flex-start;gap:2rem;margin-bottom:3rem;position:relative;opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.tl-item.visible{opacity:1;transform:translateY(0)}
+.tl-item.hidden{display:none}
+.tl-item:nth-child(odd){flex-direction:row-reverse}
+.tl-item:nth-child(odd) .tl-card{text-align:right}
+.tl-dot{position:absolute;left:50%;top:1.5rem;width:14px;height:14px;border-radius:50%;background:var(--blue);border:3px solid var(--bg);box-shadow:0 0 15px var(--glow);transform:translateX(-50%);transition:transform .3s,box-shadow .3s;z-index:2;cursor:pointer}
+.tl-item:hover .tl-dot{transform:translateX(-50%) scale(1.6);box-shadow:0 0 25px var(--glow)}
+.tl-card{flex:1;max-width:calc(50% - 3rem);background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;cursor:pointer;position:relative;overflow:hidden;transition:border-color .3s,transform .3s,box-shadow .3s}
+.tl-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,179,237,.05),transparent);opacity:0;transition:opacity .3s}
+.tl-card:hover{border-color:var(--blue);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,.4),0 0 30px rgba(99,179,237,.1)}
+.tl-card:hover::before{opacity:1}
+.tl-year{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--blue);margin-bottom:.5rem}
+.tl-title{font-size:1.05rem;font-weight:600;color:#fff;margin-bottom:.5rem}
+.tl-author{font-size:.8rem;color:var(--cyan);margin-bottom:.75rem;font-style:italic}
+.tl-desc{font-size:.875rem;color:var(--muted);line-height:1.6}
+.tl-badge{display:inline-block;margin-top:.75rem;padding:.25rem .75rem;border-radius:999px;font-size:.7rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.05em}
+.badge-breakthrough{background:rgba(104,211,145,.15);color:var(--green);border:1px solid rgba(104,211,145,.3)}
+.badge-winter{background:rgba(252,129,129,.15);color:var(--red);border:1px solid rgba(252,129,129,.3)}
+.badge-research{background:rgba(99,179,237,.15);color:var(--blue);border:1px solid rgba(99,179,237,.3)}
+.badge-milestone{background:rgba(183,148,244,.15);color:var(--purple);border:1px solid rgba(183,148,244,.3)}
+.tl-spacer{flex:1;max-width:calc(50% - 3rem)}
+
+/* BOOKS */
+.books-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.5rem}
+.book-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease,border-color .3s,box-shadow .3s}
+.book-card.visible{opacity:1;transform:translateY(0)}
+.book-card:hover{border-color:var(--purple);box-shadow:0 20px 40px rgba(0,0,0,.4),0 0 25px rgba(183,148,244,.1)}
+.book-icon{font-size:2rem;margin-bottom:1rem}
+.book-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:.25rem}
+.book-author{font-size:.8rem;color:var(--purple);margin-bottom:.25rem}
+.book-year{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);margin-bottom:.75rem}
+.book-desc{font-size:.85rem;color:var(--muted);margin-bottom:.75rem}
+.book-impact{font-size:.8rem;color:var(--cyan);padding:.5rem;background:rgba(118,228,247,.06);border-radius:8px;border-left:2px solid var(--cyan)}
+
+/* FUTURE */
+.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.5rem;margin-top:2rem}
+.future-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.75rem;text-align:center;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease,border-color .3s}
+.future-card.visible{opacity:1;transform:translateY(0)}
+.future-card:hover{border-color:var(--cyan)}
+.future-icon{font-size:2.5rem;margin-bottom:1rem}
+.future-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:.5rem}
+.future-desc{font-size:.85rem;color:var(--muted)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:2rem;max-width:560px;width:100%;transform:scale(.9) translateY(20px);transition:transform .3s;position:relative;max-height:80vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+.modal-close{position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.1);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.modal-close:hover{background:rgba(255,255,255,.2)}
+.modal-year{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;color:var(--blue)}
+.modal-title{font-size:1.3rem;font-weight:700;color:#fff;margin:.5rem 0}
+.modal-meta{font-size:.85rem;color:var(--cyan);margin-bottom:1rem}
+.modal-body{font-size:.9rem;color:var(--muted);line-height:1.8}
+
+/* BACK TO TOP */
+#backTop{position:fixed;bottom:2rem;right:2rem;z-index:100;width:44px;height:44px;border-radius:50%;background:rgba(99,179,237,.2);border:1px solid var(--border);color:var(--blue);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(20px);transition:all .3s;backdrop-filter:blur(10px)}
+#backTop.show{opacity:1;transform:translateY(0)}
+#backTop:hover{background:rgba(99,179,237,.4);box-shadow:0 0 20px var(--glow)}
+
+@keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);max-width:1100px;margin:0 auto}
+footer{text-align:center;padding:3rem 1.5rem;font-size:.85rem;color:var(--muted);border-top:1px solid var(--border)}
+footer span{color:var(--blue)}
+
+@media(max-width:768px){
+  .timeline::before{left:20px}
+  .tl-item,.tl-item:nth-child(odd){flex-direction:row}
+  .tl-item:nth-child(odd) .tl-card{text-align:left}
+  .tl-dot{left:20px}
+  .tl-card{max-width:calc(100% - 55px);margin-left:55px}
+  .tl-spacer{display:none}
+  .hero-stats{gap:1.5rem}
+}
+</style>
 </head>
-
 <body>
 
 <header class="hero">
-  <div class="grid-overlay"></div>
-  <h1>História da Inteligência Artificial</h1>
-  <p>Uma jornada tecnológica de 1943 até a era dos Modelos de Linguagem</p>
-  <div class="scroll-indicator"></div>
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">1943 — Presente</div>
+    <h1>História da Inteligência Artificial</h1>
+    <p class="hero-sub">Uma jornada interativa pelos marcos que moldaram a mente das máquinas — de McCulloch &amp; Pitts até os grandes modelos de linguagem.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">80+</div><div class="stat-label">Anos de história</div></div>
+      <div class="stat"><div class="stat-num">13</div><div class="stat-label">Marcos históricos</div></div>
+      <div class="stat"><div class="stat-num">5</div><div class="stat-label">Obras essenciais</div></div>
+    </div>
+  </div>
+  <div class="scroll-hint">Scroll</div>
 </header>
 
-<section class="filters">
-  <button data-filter="all" class="active">Todos</button>
-  <button data-filter="1940-1980">1940–1980</button>
-  <button data-filter="1980-2000">1980–2000</button>
-  <button data-filter="2000+">2000+</button>
-</section>
-
-<section class="timeline">
-
-  <div class="timeline-item" data-period="1940-1980">
-    <div class="card">
-      <span class="year">1943</span>
-      <h3>Primeiro Neurônio Artificial</h3>
-      <p>McCulloch & Pitts criam modelo matemático inspirado no cérebro.</p>
-      <button class="details-btn">Ver detalhes</button>
-    </div>
+<section id="timeline">
+  <div class="section-header">
+    <p class="section-tag">// cronologia</p>
+    <h2>Linha do Tempo</h2>
+    <p class="section-desc">Clique em qualquer evento para ver mais detalhes sobre aquele momento histórico.</p>
   </div>
-
-  <div class="timeline-item" data-period="1940-1980">
-    <div class="card">
-      <span class="year">1950</span>
-      <h3>Teste de Turing</h3>
-      <p>Proposta para avaliar inteligência em máquinas.</p>
-      <button class="details-btn">Ver detalhes</button>
-    </div>
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">Todos os períodos</button>
+    <button class="filter-btn" data-filter="1940-1980">1940 – 1980</button>
+    <button class="filter-btn" data-filter="1980-2000">1980 – 2000</button>
+    <button class="filter-btn" data-filter="2000+">2000+</button>
   </div>
+  <div class="timeline" id="tlContainer">
 
-  <div class="timeline-item" data-period="1940-1980">
-    <div class="card">
-      <span class="year">1956</span>
-      <h3>Conferência de Dartmouth</h3>
-      <p>Nascimento oficial da Inteligência Artificial.</p>
-      <button class="details-btn">Ver detalhes</button>
+    <div class="tl-item" data-year="1943" data-full="McCulloch e Pitts publicaram o primeiro modelo matemático de neurônios artificiais, propondo que o cérebro poderia ser modelado como um circuito lógico. Este trabalho inspirou toda a área de redes neurais e computação cognitiva, demonstrando que processos mentais poderiam ser descritos por equações lógicas — uma ideia revolucionária que ecoou por décadas.">
+      <div class="tl-card"><div class="tl-year">1943</div><div class="tl-title">Neurônios Artificiais</div><div class="tl-author">Warren McCulloch &amp; Walter Pitts</div><div class="tl-desc">"A Logical Calculus of the Ideas Immanent in Nervous Activity" — primeiro modelo matemático de neurônio artificial, base de toda a área.</div><span class="tl-badge badge-research">Pesquisa Fundacional</span></div>
+      <div class="tl-dot"></div><div class="tl-spacer"></div>
     </div>
-  </div>
 
-  <div class="timeline-item inverno" data-period="1940-1980">
-    <div class="card">
-      <span class="year">1969</span>
-      <h3>Perceptrons & Inverno da IA</h3>
-      <p>Críticas às redes neurais reduzem investimentos.</p>
-      <button class="details-btn">Ver detalhes</button>
+    <div class="tl-item" data-year="1950" data-full="Alan Turing publicou 'Computing Machinery and Intelligence', propondo o famoso Jogo da Imitação, mais tarde conhecido como Teste de Turing. Turing questionou: 'Podem as máquinas pensar?' e estabeleceu um critério prático para avaliar a inteligência artificial. Este artigo definiu a agenda filosófica e técnica da IA por décadas.">
+      <div class="tl-spacer"></div><div class="tl-dot"></div>
+      <div class="tl-card"><div class="tl-year">1950</div><div class="tl-title">Teste de Turing</div><div class="tl-author">Alan Turing</div><div class="tl-desc">"Computing Machinery and Intelligence" — "Podem as máquinas pensar?" O Jogo da Imitação define o critério fundacional para inteligência artificial.</div><span class="tl-badge badge-milestone">Marco Fundamental</span></div>
     </div>
-  </div>
 
-  <div class="timeline-item" data-period="1980-2000">
-    <div class="card">
-      <span class="year">1986</span>
-      <h3>Backpropagation</h3>
-      <p>Algoritmo impulsiona o retorno das redes neurais.</p>
-      <button class="details-btn">Ver detalhes</button>
+    <div class="tl-item" data-year="1956" data-full="John McCarthy, Marvin Minsky, Nathaniel Rochester e Claude Shannon organizaram a Conferência de Dartmouth, o evento que oficialmente batizou o campo de 'Artificial Intelligence'. McCarthy cunhou o termo e a conferência reuniu os pesquisadores que se tornariam os fundadores da IA. O otimismo era imenso — muitos acreditavam que uma IA completa seria desenvolvida em poucos anos.">
+      <div class="tl-card"><div class="tl-year">1956</div><div class="tl-title">Conferência de Dartmouth</div><div class="tl-author">John McCarthy, Marvin Minsky et al.</div><div class="tl-desc">Nascimento oficial da IA como disciplina. McCarthy cunha o termo "Artificial Intelligence" e define a agenda de toda uma geração de pesquisadores.</div><span class="tl-badge badge-breakthrough">Ruptura</span></div>
+      <div class="tl-dot"></div><div class="tl-spacer"></div>
     </div>
-  </div>
 
-  <div class="timeline-item" data-period="1980-2000">
-    <div class="card">
-      <span class="year">1997</span>
-      <h3>Deep Blue</h3>
-      <p>Computador derrota campeão mundial de xadrez.</p>
-      <button class="details-btn">Ver detalhes</button>
+    <div class="tl-item" data-year="1969" data-full="Minsky e Papert publicaram 'Perceptrons', demonstrando matematicamente as limitações dos perceptrons de camada única — em particular, a incapacidade de resolver o problema XOR. O livro contribuiu diretamente para o primeiro Inverno da IA: corte drástico de financiamento e diminuição do interesse na área por quase uma década. Paradoxalmente, o rigor do trabalho também pavimentou o caminho para o Deep Learning futuro.">
+      <div class="tl-spacer"></div><div class="tl-dot"></div>
+      <div class="tl-card"><div class="tl-year">1969</div><div class="tl-title">Perceptrons &amp; 1° Inverno da IA</div><div class="tl-author">Marvin Minsky &amp; Seymour Papert</div><div class="tl-desc">"Perceptrons" demonstra limitações matemáticas das redes neurais iniciais. Causa o primeiro grande declínio de financiamento e interesse na área.</div><span class="tl-badge badge-winter">❄️ Inverno da IA</span></div>
     </div>
-  </div>
 
-  <div class="timeline-item" data-period="2000+">
-    <div class="card">
-      <span class="year">2012</span>
-      <h3>AlexNet</h3>
-      <p>Revolução no Deep Learning com ImageNet.</p>
-      <button class="details-btn">Ver detalhes</button>
+    <div class="tl-item" data-year="1974" data-full="O período de 1974 a 1980 ficou conhecido como o Primeiro Inverno da IA. Com as críticas ao campo e o fim do otimismo inicial, agências como DARPA cortaram drasticamente o financiamento. Muitos laboratórios foram fechados e pesquisadores migraram para outras áreas. Este período mostrou a vulnerabilidade do campo a ciclos de expectativas excessivas — padrão que se repetiria.">
+      <div class="tl-card"><div class="tl-year">1974–1980</div><div class="tl-title">Primeiro Inverno da IA</div><div class="tl-author">Declínio global de financiamento</div><div class="tl-desc">Cortes massivos pela DARPA e outras agências. Promessas não cumpridas levam ao ceticismo generalizado e fechamento de laboratórios.</div><span class="tl-badge badge-winter">❄️ Crise</span></div>
+      <div class="tl-dot"></div><div class="tl-spacer"></div>
     </div>
-  </div>
 
-  <div class="timeline-item" data-period="2000+">
-    <div class="card">
-      <span class="year">2016</span>
-      <h3>AlphaGo</h3>
-      <p>IA derrota campeão mundial de Go.</p>
-      <button class="details-btn">Ver detalhes</button>
+    <div class="tl-item" data-year="1986" data-full="Rumelhart, Hinton e Williams popularizaram o algoritmo de retropropagação (backpropagation) em 1986, tornando possível treinar redes neurais com múltiplas camadas de forma eficiente. O algoritmo calculava os gradientes necessários para ajustar os pesos da rede — análogo ao aprendizado por tentativa e erro. Este foi o marco que inaugurou as redes neurais modernas.">
+      <div class="tl-spacer"></div><div class="tl-dot"></div>
+      <div class="tl-card"><div class="tl-year">1986</div><div class="tl-title">Renascimento: Backpropagation</div><div class="tl-author">Rumelhart, Hinton &amp; Williams</div><div class="tl-desc">Retropropagação viabiliza o treinamento de redes neurais profundas. O ressurgimento das redes reacende interesse e investimentos em todo o mundo.</div><span class="tl-badge badge-breakthrough">Ruptura</span></div>
     </div>
-  </div>
 
-  <div class="timeline-item" data-period="2000+">
-    <div class="card">
-      <span class="year">2022+</span>
-      <h3>Modelos de Linguagem (LLMs)</h3>
-      <p>Popularização da IA generativa em escala global.</p>
-      <button class="details-btn">Ver detalhes</button>
+    <div class="tl-item" data-year="1987" data-full="O Segundo Inverno da IA (1987–1993) foi causado pelo colapso do mercado de hardware especializado (máquinas Lisp) e pela concorrência dos PCs baratos. Os Sistemas Especialistas mostraram-se caros de manter e limitados em escala. Novo ciclo de expectativas infladas e resultados aquém levou a cortes ainda mais severos de financiamento.">
+      <div class="tl-card"><div class="tl-year">1987–1993</div><div class="tl-title">Segundo Inverno da IA</div><div class="tl-author">Colapso dos Sistemas Especialistas</div><div class="tl-desc">O mercado de hardware especializado colapsa. Sistemas Especialistas revelam suas limitações. Novo e mais severo ciclo de desinvestimento institucional.</div><span class="tl-badge badge-winter">❄️ Inverno da IA</span></div>
+      <div class="tl-dot"></div><div class="tl-spacer"></div>
     </div>
-  </div>
 
-</section>
+    <div class="tl-item" data-year="1997" data-full="O Deep Blue da IBM derrotou o campeão mundial Garry Kasparov por 3.5 a 2.5. Foi a primeira vez que um computador derrotou um campeão mundial de xadrez em condições oficiais de torneio. O evento teve enorme impacto midiático e filosófico, questionando a natureza única do pensamento humano. Um marco que o mundo inteiro acompanhou.">
+      <div class="tl-spacer"></div><div class="tl-dot"></div>
+      <div class="tl-card"><div class="tl-year">1997</div><div class="tl-title">Deep Blue vs. Kasparov</div><div class="tl-author">IBM Deep Blue</div><div class="tl-desc">Deep Blue derrota o campeão mundial Garry Kasparov no xadrez. Primeira vitória de computador sobre um humano em condições oficiais de torneio.</div><span class="tl-badge badge-milestone">Marco Histórico</span></div>
+    </div>
 
-<section class="literature">
-  <h2>Literatura Fundamental</h2>
-  <div class="books">
-    <div class="book-card">Artificial Intelligence: A Modern Approach (1995)</div>
-    <div class="book-card">Perceptrons (1969)</div>
-    <div class="book-card">Gödel, Escher, Bach (1979)</div>
-    <div class="book-card">The Quest for Artificial Intelligence (2009)</div>
-    <div class="book-card">Superintelligence (2014)</div>
+    <div class="tl-item" data-year="2006" data-full="Geoffrey Hinton e colaboradores introduziram técnicas de pré-treinamento para redes profundas usando Restricted Boltzmann Machines, popularizando o termo Deep Learning. Este trabalho abriu caminho para o treinamento eficiente de redes com muitas camadas, superando o problema do vanishing gradient que travava o campo. A era do Deep Learning havia chegado silenciosamente.">
+      <div class="tl-card"><div class="tl-year">2006</div><div class="tl-title">Deep Learning Ressurge</div><div class="tl-author">Geoffrey Hinton et al.</div><div class="tl-desc">Hinton populariza "Deep Learning" com pré-treinamento não supervisionado. O problema do vanishing gradient é finalmente endereçado de forma prática.</div><span class="tl-badge badge-breakthrough">Ruptura Técnica</span></div>
+      <div class="tl-dot"></div><div class="tl-spacer"></div>
+    </div>
+
+    <div class="tl-item" data-year="2012" data-full="AlexNet, desenvolvida por Krizhevsky, Sutskever e Hinton, venceu o ImageNet Large Scale Visual Recognition Challenge reduzindo a taxa de erro de 26% para 15.3% — uma margem sem precedentes. A rede convolucional profunda, treinada em GPUs, marcou o início da revolução do Deep Learning. Este ano é amplamente considerado o ponto de inflexão da IA moderna.">
+      <div class="tl-spacer"></div><div class="tl-dot"></div>
+      <div class="tl-card"><div class="tl-year">2012</div><div class="tl-title">AlexNet &amp; Revolução do Deep Learning</div><div class="tl-author">Krizhevsky, Sutskever &amp; Hinton</div><div class="tl-desc">AlexNet vence o ImageNet com margem histórica. GPUs + redes convolucionais profundas inauguraram definitivamente a era moderna do Deep Learning.</div><span class="tl-badge badge-breakthrough">Revolução</span></div>
+    </div>
+
+    <div class="tl-item" data-year="2016" data-full="AlphaGo da DeepMind derrotou Lee Sedol por 4 a 1. O Go era considerado intratável para máquinas — seu espaço de estados é 10^170 vs 10^43 do xadrez. AlphaGo combinou redes neurais profundas com Monte Carlo Tree Search. A versão AlphaZero aprendeu do zero, sem nenhum dado humano. Uma demonstração definitiva do Reinforcement Learning profundo.">
+      <div class="tl-card"><div class="tl-year">2016</div><div class="tl-title">AlphaGo derrota Lee Sedol</div><div class="tl-author">DeepMind / Google</div><div class="tl-desc">AlphaGo conquista o Go, jogo considerado intratável para máquinas. Demonstração definitiva do poder do Reinforcement Learning profundo combinado com redes neurais.</div><span class="tl-badge badge-breakthrough">Ruptura</span></div>
+      <div class="tl-dot"></div><div class="tl-spacer"></div>
+    </div>
+
+    <div class="tl-item" data-year="2017" data-full="O paper 'Attention Is All You Need' de Vaswani et al. (Google Brain) introduziu a arquitetura Transformer, substituindo as redes recorrentes para NLP. O mecanismo de auto-atenção permitiu paralelização eficiente e captura de dependências de longo alcance. O Transformer tornou-se a base de praticamente todos os grandes modelos subsequentes: BERT, GPT, T5, Claude, Gemini.">
+      <div class="tl-spacer"></div><div class="tl-dot"></div>
+      <div class="tl-card"><div class="tl-year">2017</div><div class="tl-title">Arquitetura Transformer</div><div class="tl-author">Vaswani et al. — Google Brain</div><div class="tl-desc">"Attention Is All You Need" — Auto-atenção revoluciona o NLP e se torna a base de praticamente todos os LLMs modernos: GPT, Claude, Gemini e outros.</div><span class="tl-badge badge-breakthrough">Fundação dos LLMs</span></div>
+    </div>
+
+    <div class="tl-item" data-year="2022" data-full="O ChatGPT da OpenAI, lançado em novembro de 2022, atingiu 100 milhões de usuários em apenas dois meses — o crescimento mais rápido de qualquer produto de consumo da história. O evento desencadeou uma corrida global em IA generativa, com Google (Gemini), Anthropic (Claude), Meta (Llama) e dezenas de outras empresas acelerando seus modelos. A IA generativa entrou definitivamente no mainstream global.">
+      <div class="tl-card"><div class="tl-year">2022</div><div class="tl-title">ChatGPT &amp; Era dos LLMs</div><div class="tl-author">OpenAI / Anthropic / Google / Meta</div><div class="tl-desc">ChatGPT atinge 100M usuários em 2 meses. GPT-4, Claude, Gemini e Llama dominam o cenário. A IA generativa transforma indústrias e a sociedade global.</div><span class="tl-badge badge-milestone">Era Atual</span></div>
+      <div class="tl-dot"></div><div class="tl-spacer"></div>
+    </div>
+
   </div>
 </section>
 
-<section class="future">
-  <h2>O Futuro da IA</h2>
-  <p>AGI, ética, regulamentação global, impactos sociais e econômicos.</p>
+<div class="divider"></div>
+
+<section id="books">
+  <div class="section-header">
+    <p class="section-tag">// literatura fundamental</p>
+    <h2>Obras Essenciais da IA</h2>
+    <p class="section-desc">Os livros que moldaram o pensamento sobre inteligência artificial ao longo das décadas.</p>
+  </div>
+  <div class="books-grid">
+    <div class="book-card"><div class="book-icon">📖</div><div class="book-title">Artificial Intelligence: A Modern Approach</div><div class="book-author">Stuart Russell &amp; Peter Norvig</div><div class="book-year">1995 · 4ª ed. 2020</div><div class="book-desc">O "AIMA" é o livro didático de IA mais adotado no mundo, cobrindo buscas, aprendizado, raciocínio probabilístico, planejamento e NLP.</div><div class="book-impact">📌 Utilizado em mais de 1.500 universidades em 135 países. A bíblia do ensino de IA.</div></div>
+    <div class="book-card"><div class="book-icon">🧮</div><div class="book-title">Perceptrons</div><div class="book-author">Marvin Minsky &amp; Seymour Papert</div><div class="book-year">1969</div><div class="book-desc">Análise matemática rigorosa das redes neurais de camada única. Demonstrou limitações que causaram o primeiro Inverno da IA.</div><div class="book-impact">📌 Influenciou — positiva e negativamente — todo o desenvolvimento das redes profundas modernas.</div></div>
+    <div class="book-card"><div class="book-icon">🎵</div><div class="book-title">Gödel, Escher, Bach</div><div class="book-author">Douglas Hofstadter</div><div class="book-year">1979 · Pulitzer Prize</div><div class="book-desc">Explora consciência, autorreferência e sistemas formais através de analogias com Bach, Escher e Gödel. Uma obra filosófica e técnica única.</div><div class="book-impact">📌 Inspirou gerações de pesquisadores sobre a natureza da consciência e cognição artificial.</div></div>
+    <div class="book-card"><div class="book-icon">🔍</div><div class="book-title">The Quest for Artificial Intelligence</div><div class="book-author">Nils J. Nilsson</div><div class="book-year">2010</div><div class="book-desc">História abrangente da IA por um de seus pioneiros, cobrindo 60 anos de avanços, fracassos e descobertas com profundidade técnica rara.</div><div class="book-impact">📌 Disponível gratuitamente. A narrativa histórica mais completa escrita por alguém que viveu os eventos.</div></div>
+    <div class="book-card"><div class="book-icon">🤖</div><div class="book-title">Superintelligence</div><div class="book-author">Nick Bostrom</div><div class="book-year">2014</div><div class="book-desc">Analisa os riscos existenciais de uma IA superinteligente e os desafios do alinhamento de valores. Obra controversa e profundamente influente.</div><div class="book-impact">📌 Colocou o debate sobre segurança em IA no mainstream acadêmico e político global.</div></div>
+  </div>
 </section>
 
-<button id="topBtn">↑</button>
+<div class="divider"></div>
 
-<div class="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <p id="modal-text"></p>
+<section id="future">
+  <div class="section-header">
+    <p class="section-tag">// o que vem a seguir</p>
+    <h2>O Futuro da Inteligência Artificial</h2>
+    <p class="section-desc">Os desafios e oportunidades que definirão as próximas décadas da IA.</p>
+  </div>
+  <div class="future-grid">
+    <div class="future-card"><div class="future-icon">🧠</div><div class="future-title">IA Geral (AGI)</div><div class="future-desc">A busca por sistemas que igualem ou superem a inteligência humana em qualquer tarefa cognitiva. Timelines variam de 5 a 50+ anos entre especialistas.</div></div>
+    <div class="future-card"><div class="future-icon">⚖️</div><div class="future-title">Ética &amp; Alinhamento</div><div class="future-desc">Garantir que sistemas de IA ajam de acordo com valores humanos. RLHF, Constitutional AI e interpretabilidade são abordagens centrais.</div></div>
+    <div class="future-card"><div class="future-icon">📜</div><div class="future-title">Regulamentação Global</div><div class="future-desc">EU AI Act, Executive Orders nos EUA e debates sobre governança global. Como regular sem sufocar a inovação é o desafio central da próxima década.</div></div>
+    <div class="future-card"><div class="future-icon">🌍</div><div class="future-title">Impactos Sociais</div><div class="future-desc">Automação de empregos, desigualdade digital, desinformação e transformação da educação. A IA redefine o que significa trabalhar e aprender.</div></div>
+  </div>
+</section>
+
+<button id="backTop" title="Voltar ao topo">↑</button>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-year" id="modalYear"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-body" id="modalBody"></div>
   </div>
 </div>
 
-<script src="script.js"></script>
+<footer>
+  <p>História da IA · Baseado em referências academicamente reconhecidas<br>
+  <span>Russell &amp; Norvig</span> · <span>Nilsson</span> · <span>Turing</span> · <span>McCarthy</span> · <span>Hinton</span></p>
+</footer>
+
+<script>
+// SCROLL REVEAL
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.tl-item, .book-card, .future-card').forEach(el => observer.observe(el));
+
+// FILTERS
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = btn.dataset.filter;
+    document.querySelectorAll('.tl-item').forEach(item => {
+      const y = parseInt(item.dataset.year);
+      const show = f==='all'
+        || (f==='1940-1980' && y>=1940 && y<=1980)
+        || (f==='1980-2000' && y>1980 && y<=2000)
+        || (f==='2000+' && y>2000);
+      if (show) {
+        item.classList.remove('hidden');
+        item.classList.remove('visible');
+        requestAnimationFrame(() => requestAnimationFrame(() => item.classList.add('visible')));
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+  });
+});
+
+// MODAL
+const modal = document.getElementById('modal');
+document.querySelectorAll('.tl-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const item = card.closest('.tl-item');
+    document.getElementById('modalYear').textContent = item.dataset.year;
+    document.getElementById('modalTitle').textContent = card.querySelector('.tl-title').textContent;
+    document.getElementById('modalMeta').textContent = card.querySelector('.tl-author').textContent;
+    document.getElementById('modalBody').textContent = item.dataset.full;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+});
+function closeModal() { modal.classList.remove('open'); document.body.style.overflow = ''; }
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// BACK TO TOP
+const backTop = document.getElementById('backTop');
+window.addEventListener('scroll', () => backTop.classList.toggle('show', window.scrollY > 400));
+backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
 </body>
 </html>
