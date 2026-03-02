@@ -1,2 +1,2 @@
-# avan-o-ia
+# avanço-ia
 site avanço da ia
